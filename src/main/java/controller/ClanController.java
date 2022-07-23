@@ -6,7 +6,7 @@ public class ClanController {
 
     ClanService clanService = new ClanService();
 
-    public void incGold(long clanId, int gold) {
-        clanService.incGold(clanId, gold);
+    public void incGold(long clanId, long userId, int gold) {
+        clanService.incGold(clanId, userId, gold);
     }
 }

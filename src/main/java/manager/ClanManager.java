@@ -16,7 +16,7 @@ public class ClanManager {
         return clanRepository.saveClan(clan);
     }
 
-    public static boolean updateClan(long clanId, Clan clan) {
-        return clanRepository.updateClan(clanId, clan);
+    public static boolean updateClanById(long clanId, Clan clan) {
+        return clanRepository.updateClanById(clanId, clan);
     }
 }

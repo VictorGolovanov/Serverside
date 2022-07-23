@@ -2,6 +2,7 @@ package service;
 
 import com.google.common.util.concurrent.Striped;
 import manager.ClanManager;
+import manager.TrackerManager;
 import model.Clan;
 
 import java.util.concurrent.locks.Lock;
@@ -9,20 +10,27 @@ import java.util.concurrent.locks.Lock;
 public class ClanService {
 
     @SuppressWarnings("UnstableApiUsage")
-    private final Striped<Lock> lockStriped = Striped.lock(100);
+    private final Striped<Lock> lockStriped = Striped.lazyWeakLock(100);
 
     @SuppressWarnings("UnstableApiUsage")
-    public void incGold(long clanId, int gold) {
+    public void incGold(long clanId, long userId, int gold) {
         Lock lock = lockStriped.get(clanId);
         lock.lock();
-        Clan clan = ClanManager.getClan(clanId);
-        if (clan != null) {
-            clan.incGold(gold);
-            boolean result =  ClanManager.updateClan(clanId, clan);
-            if (!result) {
-                throw new RuntimeException("update failed");
+        try {
+            Clan clan = ClanManager.getClan(clanId);
+            if (clan != null) {
+                clan.incGold(gold);
+                boolean clanResult = ClanManager.updateClanById(clanId, clan);
+                if (!clanResult) {
+                    throw new RuntimeException("clan update failed");
+                }
+                boolean trackerResult = TrackerManager.trackerClanGold(clanId, userId, gold);
+                if (!trackerResult) {
+                    throw new RuntimeException("tracker update failed");
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 }

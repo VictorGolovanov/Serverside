@@ -7,17 +7,15 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ClanRepository {
+import static database.DBStrings.*;
 
-    private static final String GET_CLAN_BY_ID = "select * from clans where id=";
-    private static final String SAVE_CLAN = "insert into clans(name, gold) ";
-    private static final String VALUES = "values";
-    private static final String UPDATE_CLAN = "update clans set ";
+public class ClanRepository {
 
     public Clan getClanById(long id) {
         Connection connection = DBConnection.getConnection();
         try {
-            ResultSet rs = connection.createStatement().executeQuery(GET_CLAN_BY_ID + id);
+            ResultSet rs = connection.createStatement()
+                    .executeQuery(String.format(GET_CLAN_BY_ID, CLAN_TABLE) + id);
             if (rs.next()) {
                 String name = rs.getString("name");
                 int gold = rs.getInt("gold");
@@ -36,24 +34,26 @@ public class ClanRepository {
             return false;
         }
         Connection connection = DBConnection.getConnection();
-        String sql = SAVE_CLAN + VALUES + "('" + clan.getName() + "' , " + clan.getGold() + ")";
+        String sql = String.format(SAVE_CLAN, CLAN_TABLE) +
+                VALUES + "('" + clan.getName() + "' , " + clan.getGold() + ")";
         try {
             int result = connection.createStatement().executeUpdate(sql);
             return result > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
-    public boolean updateClan(long id, Clan clan) {
+    public boolean updateClanById(long id, Clan clan) {
         Connection connection = DBConnection.getConnection();
-        String sql = UPDATE_CLAN + "name = " + "'" + clan.getName() + "', gold = " + clan.getGold() + " where id = " + id;
+        String sql = String.format(UPDATE_CLAN, CLAN_TABLE) +
+                "name = " + "'" + clan.getName() + "', gold = " + clan.getGold() + " where id = " + id;
         try {
             int result = connection.createStatement().executeUpdate(sql);
             return result > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 }
